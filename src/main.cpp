@@ -138,7 +138,52 @@ int main() {
         //
         // Use SOFT_LIMIT_PERCENT and HARD_LIMIT_PERCENT to parameterize the green and red
         // line positions.
-        camera.setCameraCenter({player.position.x, WINDOW_HEIGHT * 0.5f});
+        
+        // 1. grab player position in window percent for soft limit percent and hard limit percent comparisons
+        sf::Vector2f playerWorldPos{player.position};
+        sf::Vector2f playerWindowPercentPos{camera.worldToWindowPercent(playerWorldPos)};
+       
+        // 2. determine if player's x pos is in the dead zone (between the 2 green lines)
+        bool inDeadZone{false};
+        // NOTE: just an x check, y doesn't need to be checked this prep I think
+        if (playerWindowPercentPos.x > SOFT_LIMIT_PERCENT && playerWindowPercentPos.x < 1 - SOFT_LIMIT_PERCENT) {
+            inDeadZone = true;
+        }
+
+        // 3. determine if player's x pos is in the the soft exclusion zone
+        bool inSoftZone{false};
+        if ((playerWindowPercentPos.x > HARD_LIMIT_PERCENT && playerWindowPercentPos.x < SOFT_LIMIT_PERCENT) ||
+            (playerWindowPercentPos.x > 1 - SOFT_LIMIT_PERCENT && playerWindowPercentPos.x < 1 - HARD_LIMIT_PERCENT)) {
+            inSoftZone = true;
+        }
+
+        // 4. determine if player's x pos is in the hard zone
+        bool inHardZone{false};
+        if (playerWindowPercentPos.x < HARD_LIMIT_PERCENT || playerWindowPercentPos.x > 1 - HARD_LIMIT_PERCENT) {
+            inHardZone = true;
+        }
+
+        // 5. deal with the 3 cases
+        if (inDeadZone) {
+            // do literally nothing
+        } else if (inSoftZone) {
+            if (playerWindowPercentPos.x > HARD_LIMIT_PERCENT && playerWindowPercentPos.x < SOFT_LIMIT_PERCENT) {
+                // Case 1: left line
+                
+            } else {
+                // Case 2: right line
+
+            }
+
+        } else if (inHardZone) {
+            if (playerWindowPercentPos.x < HARD_LIMIT_PERCENT) {
+                // Case 1: left line
+                // camera.setCameraPercent()
+            } else {
+                // Case 2: right line
+            }
+        }
+        
 
         worldView.setCenter(camera.getCameraCenter());
         window.clear(sf::Color::Black);

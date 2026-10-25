@@ -13,7 +13,6 @@ public:
           mViewCenterWorld{viewCenterWorld},
           mWorldUnitsPerPixel{worldUnitsPerPixel} {}
 
-    // TODO: all of these:
 
     sf::Vector2f windowToWorld(const sf::Vector2f& pWindow) {
         // take window's dimensions & just multiply by mWorldUnitsPerPixel to convert
@@ -55,9 +54,13 @@ public:
     };
 
     void setCamera(const sf::Vector2f& pWorld, const sf::Vector2f& pWindow) {
-        // set mViewCenterWorld and mWindowSize I assume?
-        mViewCenterWorld = pWorld;
-        mWindowSize = pWindow;
+        // TODO: I am pretty sure this is wrong
+        // 1. convert window to world coordinates
+        sf::Vector2f worldCoordinates{windowToWorld(pWindow)};
+        // 2. find translation: worldCoordinates - pWorld gives the vector from pWorld to worldCoordinates, our offset
+        sf::Vector2f offset{worldCoordinates - pWorld};
+        // 3. move camera to pWorld + this offset
+        mViewCenterWorld = pWorld + offset;
     };
 
     void setCameraPercent(const sf::Vector2f& pWorld, const sf::Vector2f& pWindowPercent) {
