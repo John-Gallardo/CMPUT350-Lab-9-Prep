@@ -152,8 +152,8 @@ int main() {
 
         // 3. determine if player's x pos is in the the soft exclusion zone
         bool inSoftZone{false};
-        if ((playerWindowPercentPos.x > HARD_LIMIT_PERCENT && playerWindowPercentPos.x < SOFT_LIMIT_PERCENT) ||
-            (playerWindowPercentPos.x > 1 - SOFT_LIMIT_PERCENT && playerWindowPercentPos.x < 1 - HARD_LIMIT_PERCENT)) {
+        if ((playerWindowPercentPos.x >= HARD_LIMIT_PERCENT && playerWindowPercentPos.x <= SOFT_LIMIT_PERCENT) ||
+            (playerWindowPercentPos.x >= 1 - SOFT_LIMIT_PERCENT && playerWindowPercentPos.x <= 1 - HARD_LIMIT_PERCENT)) {
             inSoftZone = true;
         }
 
@@ -164,19 +164,50 @@ int main() {
         }
 
         // 5. deal with the 3 cases
+        // NOTE: this bool is for resetting positionCurrent when necessary (we reset if we just entered)
+        static bool notInSoftZone{false};  
         if (inDeadZone) {
-            // do literally nothing
-        } else if (inSoftZone) {
+            // do literally nothing except notInSoftZone change
+            notInSoftZone = true;
+        } else if (inSoftZone || inHardZone) {
             if (playerWindowPercentPos.x > HARD_LIMIT_PERCENT && playerWindowPercentPos.x < SOFT_LIMIT_PERCENT) {
                 // Case 1: left line
-                // NOTE: y set to 0 because I don't think it matters
-                // camera.setCameraPercent(playerWorldPos, sf::Vector2f{SOFT_LIMIT_PERCENT, 0});
+                // idea: setCameraPercent maps the line to the world position specified
+                // -> for left line, we want the first position to be slightly left of the line, and we want it to approach playerWorldPos.x slowly
+                // I assume sn is what approaches playerWorldPos.x?
+
+                // calculate sn based on formula
+                // equivalent to: positionNew = positionCurrent + alpha * (target - positionCurrent) from google's AI overview
+                // NOTE: y set to 0 because I don't think it matters (setCamera ignores y offset entirely)
+                // static used to store previous position
+                static sf::Vector2f positionCurrent{};
+
+                // check if we just newly entered soft zone, if so set positionCurrent again (need to do it since it's in WORLD COORDINATES)
+                if (notInSoftZone) {
+                    notInSoftZone = false;
+                    // starting position is the left green line's x value
+                    positionCurrent = camera.windowPercentToWorld(sf::Vector2f{SOFT_LIMIT_PERCENT, 0.0f});
+                }
+
+                sf::Vector2f positionNew{positionCurrent + SOFT_CAMERA_ALPHA * (playerWorldPos - positionCurrent)};
+                positionCurrent = positionNew;
+
+                camera.setCameraPercent(positionNew, sf::Vector2f{SOFT_LIMIT_PERCENT, 0});
             } else {
                 // Case 2: right line
-                // camera.setCameraPercent(playerWorldPos, sf::Vector2f{1 - SOFT_LIMIT_PERCENT, 0});
+                // same idea as left line case
+                static sf::Vector2f positionCurrent{};
+                if (notInSoftZone) {
+                    notInSoftZone = false;
+                    // starting position is the right green line's x value
+                    positionCurrent = camera.windowPercentToWorld(sf::Vector2f{1 - SOFT_LIMIT_PERCENT, 0.0f});
+                }
 
-            }
+                sf::Vector2f positionNew{positionCurrent + SOFT_CAMERA_ALPHA * (playerWorldPos - positionCurrent)};
+                positionCurrent = positionNew;
 
+                camera.setCameraPercent(positionNew, sf::Vector2f{1 - SOFT_LIMIT_PERCENT, 0.0f});
+            } 
         } else if (inHardZone) {
             if (playerWindowPercentPos.x < HARD_LIMIT_PERCENT) {
                 // Case 1: left line
