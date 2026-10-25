@@ -15,13 +15,16 @@ public:
 
 
     sf::Vector2f windowToWorld(const sf::Vector2f& pWindow) {
-        // take window's dimensions & just multiply by mWorldUnitsPerPixel to convert
-        return pWindow * mWorldUnitsPerPixel;
+        // NOTE: formula is from worldToWindow, but rearranged for pWorld
+        // I didn't test this but I think it makes sense to account for offsets
+        return (pWindow - mWindowSize / 2.0f) * mWorldUnitsPerPixel + mViewCenterWorld;
     };
 
     sf::Vector2f worldToWindow(const sf::Vector2f& pWorld) {
-        // take world dimensions & just divide by mWorldUnitsPerPixel to convert
-        return pWorld / mWorldUnitsPerPixel;
+        // subtract viewport center to remove offset, then divide by mWorldUnitsPerPixel to convert.
+        // we add mWindowSize / 2.0f so that we are relative to the CENTER of the window, not (0, 0)
+        // if that doesn't make sense, center of the window in windowPercent is (0, 0) without, but with the offset (0.5, 0.5) which makes sense
+        return (pWorld - mViewCenterWorld) / mWorldUnitsPerPixel + mWindowSize / 2.0f;
     };
 
     sf::Vector2f windowPercentToWorld(const sf::Vector2f& pWindowPercent) {
@@ -59,8 +62,8 @@ public:
         sf::Vector2f worldCoordinates{windowToWorld(pWindow)};
         // 2. find translation: worldCoordinates - pWorld gives the vector from pWorld to worldCoordinates, our offset
         sf::Vector2f offset{worldCoordinates - pWorld};
-        // 3. move camera to pWorld + this offset
-        mViewCenterWorld = pWorld + offset;
+        // 3. move camera to pWorld + this offset (ignore y)
+        mViewCenterWorld.x = pWorld.x + offset.x;
     };
 
     void setCameraPercent(const sf::Vector2f& pWorld, const sf::Vector2f& pWindowPercent) {
