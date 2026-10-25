@@ -3,8 +3,6 @@
 
 #include "camera.h"
 #include <SFML/Graphics.hpp>
-// TODO: remove
-#include <iostream>
 
 constexpr size_t WINDOW_WIDTH = 1280;
 constexpr size_t WINDOW_HEIGHT = 720;
@@ -166,44 +164,29 @@ int main() {
         }
 
         // 5. deal with the 3 cases
-        /*
         if (inDeadZone) {
             // do literally nothing
         } else if (inSoftZone) {
             if (playerWindowPercentPos.x > HARD_LIMIT_PERCENT && playerWindowPercentPos.x < SOFT_LIMIT_PERCENT) {
                 // Case 1: left line
                 // NOTE: y set to 0 because I don't think it matters
-                // camera.setCameraPercent(sf::Vector2f{SOFT_LIMIT_PERCENT, 0}, sf::Vector2f{SOFT_LIMIT_PERCENT, 0});
+                // camera.setCameraPercent(playerWorldPos, sf::Vector2f{SOFT_LIMIT_PERCENT, 0});
             } else {
                 // Case 2: right line
-                // camera.setCameraPercent(sf::Vector2f{1 - SOFT_LIMIT_PERCENT, 0}, sf::Vector2f{1 - SOFT_LIMIT_PERCENT, 0});
+                // camera.setCameraPercent(playerWorldPos, sf::Vector2f{1 - SOFT_LIMIT_PERCENT, 0});
 
             }
 
         } else if (inHardZone) {
             if (playerWindowPercentPos.x < HARD_LIMIT_PERCENT) {
                 // Case 1: left line
-                camera.setCameraPercent(sf::Vector2f{}, sf::Vector2f{HARD_LIMIT_PERCENT, 0});
+                // we map the line TO the player's position!
+                camera.setCameraPercent(playerWorldPos, sf::Vector2f{HARD_LIMIT_PERCENT, 0});
             } else {
                 // Case 2: right line
-                camera.setCameraPercent(sf::Vector2f{}, sf::Vector2f{1 - HARD_LIMIT_PERCENT, 0});
+                camera.setCameraPercent(playerWorldPos, sf::Vector2f{1 - HARD_LIMIT_PERCENT, 0});
             }
         }
-        */
-
-        // TODO: remove
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Scan::J)) {
-            std::cout << inHardZone << '\n';
-        }
-
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Scan::K)) {
-            std::cout << playerWindowPercentPos.x << '\n';
-        }
-
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Scan::L)) {
-            camera.setCameraCenter({player.position.x, WINDOW_HEIGHT * 0.5f});
-        }
-
 
         worldView.setCenter(camera.getCameraCenter());
         window.clear(sf::Color::Black);
