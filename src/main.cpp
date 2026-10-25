@@ -169,7 +169,7 @@ int main() {
         if (inDeadZone) {
             // do literally nothing except notInSoftZone change
             notInSoftZone = true;
-        } else if (inSoftZone || inHardZone) {
+        } else if (inSoftZone) {
             if (playerWindowPercentPos.x > HARD_LIMIT_PERCENT && playerWindowPercentPos.x < SOFT_LIMIT_PERCENT) {
                 // Case 1: left line
                 // idea: setCameraPercent maps the line to the world position specified
@@ -209,6 +209,7 @@ int main() {
                 camera.setCameraPercent(positionNew, sf::Vector2f{1 - SOFT_LIMIT_PERCENT, 0.0f});
             } 
         } else if (inHardZone) {
+            notInSoftZone = true;
             if (playerWindowPercentPos.x < HARD_LIMIT_PERCENT) {
                 // Case 1: left line
                 // we map the line TO the player's position!
